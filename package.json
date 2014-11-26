@@ -1,0 +1,22 @@
+{
+  "name": "et-log-parser",
+  "version": "0.0.1",
+  "description": "et-log-parser\r =============",
+  "main": "enemy-territory-log-parser.js",
+  "scripts": {
+    "test": "mocha test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/haapanen/et-log-parser.git"
+  },
+  "author": "Jussi Haapanen <haapanen.jussi@gmail.com> (http://etjump.com/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/haapanen/et-log-parser/issues"
+  },
+  "homepage": "https://github.com/haapanen/et-log-parser",
+  "dependencies": {
+    "lodash": "^2.4.1"
+  }
+}
