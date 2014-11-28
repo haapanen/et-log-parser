@@ -20,10 +20,11 @@ var fireteamSayPattern = /^saybuddy: (.+): (.+)$/;
  *  "message", messageObject // read a new message
  *
  * @param options
+ * @param callback This gets called when watcher is watching a file.
  * @returns {LogWatcher}
  * @constructor
  */
-function LogWatcher(options) {
+function LogWatcher(options, callback) {
   if (!(this instanceof LogWatcher)) {
     return new LogWatcher(options);
   }
@@ -37,16 +38,16 @@ function LogWatcher(options) {
     throw "options.file is not defined";
   }
 
-  console.log("täs");
-  this.watchFile();
+  this.watchFile(callback);
 }
 util.inherits(LogWatcher, EventEmitter);
 
 /**
  * Watch a file defined in the options.file parameter.
  * Emits events on file change.
+ * @param callback
  */
-LogWatcher.prototype.watchFile = function () {
+LogWatcher.prototype.watchFile = function (callback) {
   var previousSize = fs.statSync(this.options.file).size;
   var self = this;
 
@@ -59,6 +60,10 @@ LogWatcher.prototype.watchFile = function () {
     if (err) {
       self.emit("error", err);
       return;
+    }
+
+    if (callback) {
+      callback();
     }
 
     fs.watchFile(self.options.file, {
@@ -98,6 +103,14 @@ LogWatcher.prototype.watchFile = function () {
  * @param newBytes
  */
 LogWatcher.prototype.parseChat = function (newBytes) {
+  if (newBytes === undefined || newBytes === null) {
+    throw "newBytes is not defined";
+  }
+
+  if (newBytes.length === 0) {
+    return;
+  }
+
   var lines = newBytes.split("\n");
   var self = this;
 
@@ -147,6 +160,30 @@ LogWatcher.prototype.unwatchFile = function () {
  * @private
  */
 function _createChatMessageObject(matched, chatType) {
+  if (matched === undefined || matched === null) {
+    throw "matched is not defined.";
+  }
+
+  if (!_.isArray(matched)) {
+    throw "matched is not an array";
+  }
+
+  if (matched.length !== 2) {
+    throw "matched should be an array with a size of 2";
+  }
+
+  if (matched[0] === undefined) {
+    throw "name is undefined";
+  }
+
+  if (matched[1] === undefined) {
+    throw "message is undefined";
+  }
+
+  if (!chatType) {
+    chatType = "all";
+  }
+
   return {
     name: matched[1],
     message: matched[2],
