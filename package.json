@@ -18,5 +18,8 @@
   "homepage": "https://github.com/haapanen/et-log-parser",
   "dependencies": {
     "lodash": "^2.4.1"
+  },
+  "devDependencies": {
+    "expect.js": "^0.3.1"
   }
 }

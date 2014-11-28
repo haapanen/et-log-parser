@@ -11,20 +11,41 @@ var sayPattern = /^say: (.+): (.+)$/;
 var teamSayPattern = /^sayteam: (.+): (.+)$/;
 var fireteamSayPattern = /^saybuddy: (.+): (.+)$/;
 
+/**
+ * Watches a log file (defined in options.file).
+ * Emits events whenever new lines are read
+ *
+ * Events: "name", arguments
+ *  "bytes", bytesRead // read x new bytes.
+ *  "message", messageObject // read a new message
+ *
+ * @param options
+ * @returns {LogWatcher}
+ * @constructor
+ */
 function LogWatcher(options) {
   if (!(this instanceof LogWatcher)) {
     return new LogWatcher(options);
   }
+  if (!options) {
+    throw "options is not defined";
+  }
+
   this.options = options;
 
   if (!this.options.file) {
     throw "options.file is not defined";
   }
 
+  console.log("täs");
   this.watchFile();
 }
 util.inherits(LogWatcher, EventEmitter);
 
+/**
+ * Watch a file defined in the options.file parameter.
+ * Emits events on file change.
+ */
 LogWatcher.prototype.watchFile = function () {
   var previousSize = fs.statSync(this.options.file).size;
   var self = this;
@@ -71,6 +92,11 @@ LogWatcher.prototype.watchFile = function () {
   });
 };
 
+/**
+ * Parses new bytes, find any possible chat messages and
+ * emits an event when one is found.
+ * @param newBytes
+ */
 LogWatcher.prototype.parseChat = function (newBytes) {
   var lines = newBytes.split("\n");
   var self = this;
@@ -99,6 +125,10 @@ LogWatcher.prototype.parseChat = function (newBytes) {
   });
 };
 
+/**
+ * Stops watching a file. This must be called in order
+ * for the application to stop.
+ */
 LogWatcher.prototype.unwatchFile = function () {
   if (this.fd === undefined) {
     return;
@@ -109,6 +139,13 @@ LogWatcher.prototype.unwatchFile = function () {
   this.fd = undefined;
 };
 
+/**
+ * Creates a chat message object.
+ * @param matched
+ * @param chatType
+ * @returns {{name: *, message: *, chatType: *}}
+ * @private
+ */
 function _createChatMessageObject(matched, chatType) {
   return {
     name: matched[1],
@@ -118,79 +155,3 @@ function _createChatMessageObject(matched, chatType) {
 }
 
 exports.LogWatcher = LogWatcher;
-//
-//function notifyOnChanges(file, callback) {
-//  var previousSize = fs.statSync(file).size;
-//
-//  fs.open(file, 'r', function (err, fd) {
-//    if (err) {
-//      callback(null, err);
-//      return;
-//    }
-//
-//    fs.watchFile(file, {
-//      interval: 100
-//    }, function () {
-//      var stat = fs.statSync(file);
-//      var currentSize = stat.size;
-//      var newBytes = currentSize - previousSize;
-//
-//      if (newBytes <= 0) {
-//        return;
-//      }
-//
-//      var buf = new Buffer(newBytes);
-//      fs.read(fd, buf, 0, newBytes, previousSize, function (err, bytesRead, buffer) {
-//        if (err) {
-//          callback(null, err);
-//          return;
-//        }
-//
-//        callback(buffer.toString());
-//      });
-//
-//      previousSize = currentSize;
-//    });
-//  });
-//}
-//
-//exports.notifyOnChanges = notifyOnChanges;
-//
-
-//
-//function notifyOnNewChatMessage(options, callback) {
-//
-//  var teamChat = false;
-//  var fireteamChat = false;
-//
-//  if (options.teamchat !== undefined && options.teamchat === true) {
-//    teamChat = true;
-//  }
-//  if (options.fireteamChat !== undefined && options.fireteamChat === true) {
-//    fireteamChat = true;
-//  }
-//
-//  notifyOnChanges(options.file, function (newBytes) {
-//    var lines = newBytes.split("\n");
-//
-//    _.each(lines, function (line) {
-//      var matched = line.match(sayPattern);
-//
-//      if (matched) {
-//        callback(_createChatMessageObject(matched, "all"));
-//      } else if (teamChat) {
-//        matched = line.match(teamSayPattern);
-//        if (matched) {
-//          callback(_createChatMessageObject(matched, "team"));
-//        }
-//      } else if (fireteamChat) {
-//        matched = line.match(fireteamChat);
-//        if (matched) {
-//          callback(_createChatMessageObject(matched, "fireteam"));
-//        }
-//      }
-//    });
-//  });
-//}
-//
-//exports.notifyOnNewChatMessage = notifyOnNewChatMessage;
