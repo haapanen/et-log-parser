@@ -1,7 +1,7 @@
 {
   "name": "et-log-parser",
   "version": "0.0.1",
-  "description": "et-log-parser\r =============",
+  "description": "et-log-parser",
   "main": "enemy-territory-log-parser.js",
   "scripts": {
     "test": "mocha test"

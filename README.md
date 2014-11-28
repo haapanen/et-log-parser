@@ -8,6 +8,10 @@ var watcher = notifier.LogWatcher({
   parseChat: true
 });
 
+watcher.on("bytes", function (newBytes) {
+  console.log(newBytes);
+});
+
 watcher.on("message", function (message) {
   console.log(message);
 });
